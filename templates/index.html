@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <body>
+        <div class="container">
+            <h1>IT 4320 Reservation System</h1>
+            {% if error_message %}
+            <p class="error">{{ error_message }}</p>
+            {% endif %}
+            <form method="POST" action="/">
+                <select name="option" required>
+                    <option value="1">Admin Login</option>
+                    <option value="2">Reserve a Seat</option>
+                </select>
+                <br>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </body>
+{% endblock %}
