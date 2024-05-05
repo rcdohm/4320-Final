@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, url_for, flash, redirect, abort
 import requests
 import sqlite3
+import uuid
 
 app = Flask(__name__, static_folder='static')
 app.config["DEBUG"] = True
@@ -16,6 +17,27 @@ def get_db_connection():
 
     #return the connection object
     return conn
+
+def generate_reservation_code():
+    return str(uuid.uuid4())
+
+def get_cost_matrix():
+    cost_matrix = [[100, 75, 50, 100] for row in range(12)]
+    return cost_matrix
+
+def calculate_total_sales():
+    cost_matrix = get_cost_matrix()
+    conn = get_db_connection()
+    reservations = conn.execute('SELECT * FROM reservations').fetchall()
+    conn.close()
+
+    total_sales = 0
+    for reservation in reservations:
+        seat_row = reservation['seatRow']
+        seat_column = reservation['seatColumn']
+        total_sales += cost_matrix[seat_row - 1][seat_column - 1]  # Adjust indices
+
+    return total_sales
 
 def create_seating_chart():
     conn = get_db_connection()
@@ -80,11 +102,45 @@ def admin():
     
     chart = create_seating_chart()
 
+    total_sales = calculate_total_sales()
 
-    return render_template('admin.html', authenticated=authenticated, chart = chart)
+
+    return render_template('admin.html', authenticated=authenticated, chart = chart,total_sales = total_sales)
 
 @app.route('/reservations', methods=['GET','POST'])
 def reservations():
+    if request.method == 'POST':
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        seat_row = int(request.form['row'])-1
+        seat_column = int(request.form['column'])-1
+
+        errors = {}
+        if not first_name:
+            errors['first_name'] = "First name is required"
+        if not last_name:
+            errors['last_name'] = "Last name is required"
+        if seat_row < 0 or seat_row > 12:
+            errors['row'] = "Invalid seat row"
+        if seat_column < 0 or seat_column > 4:
+            errors['column'] = "Invalid seat column"
+
+        if errors:
+            chart = create_seating_chart()
+            return render_template('reservations.html', chart=chart, errors=errors)
+
+        reservation_code = generate_reservation_code()
+
+        conn = get_db_connection()
+        conn.execute('INSERT INTO reservations (passengerName, seatRow, seatColumn, eTicketNumber) VALUES (?, ?, ?, ?)',
+                     (first_name + ' ' + last_name, seat_row, seat_column, reservation_code))
+        conn.commit()
+        conn.close()
+
+        flash("Reservation successful! Your Ticket number is: " + reservation_code)
+
+        return redirect(url_for('index'))
+
     chart = create_seating_chart()
     return render_template('reservations.html',chart = chart)
 

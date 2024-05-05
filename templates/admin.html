@@ -21,6 +21,7 @@
             <button type="submit">Submit</button>
         </form>
         {% if authenticated %}
+            <h2>Total Sales: ${{ total_sales }}</h2>
             {% for seat in chart %}
             <p>{{ seat }}</p>
             {% endfor %}
