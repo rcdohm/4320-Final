@@ -18,8 +18,22 @@ def get_db_connection():
     #return the connection object
     return conn
 
-def generate_reservation_code():
-    return str(uuid.uuid4())
+def generate_reservation_code(s):
+    t="INFOTC4320"
+    i = j = 0
+    result = ""
+    while i < len(s) and j < len(t):
+        result += s[i] + t[j]
+        i+=1
+        j+=1
+    while i < len(s):
+        result += s[i]
+        i += 1
+    while j < len(t):
+        result += t[j]
+        j += 1
+    return result
+      
 
 def get_cost_matrix():
     cost_matrix = [[100, 75, 50, 100] for row in range(12)]
@@ -129,7 +143,7 @@ def reservations():
             chart = create_seating_chart()
             return render_template('reservations.html', chart=chart, errors=errors)
 
-        reservation_code = generate_reservation_code()
+        reservation_code = generate_reservation_code(first_name + last_name)
 
         conn = get_db_connection()
         conn.execute('INSERT INTO reservations (passengerName, seatRow, seatColumn, eTicketNumber) VALUES (?, ?, ?, ?)',
