@@ -17,6 +17,23 @@ def get_db_connection():
     #return the connection object
     return conn
 
+def create_seating_chart():
+    conn = get_db_connection()
+
+    reservations = conn.execute('SELECT * FROM reservations').fetchall()
+    conn.close()
+
+    chart = [['O' for x in range(4)] for y in range(12)]
+
+    for seat in reservations:
+        chart[seat['seatRow']][seat['seatColumn']] = 'X'
+
+    for row in chart:
+        print(row)        
+
+    return chart
+    
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -60,12 +77,16 @@ def admin():
         
         if authenticated == False:
             flash("Login credentials invalid")
+    
+    chart = create_seating_chart()
 
-    return render_template('admin.html', authenticated=authenticated)
+
+    return render_template('admin.html', authenticated=authenticated, chart = chart)
 
 @app.route('/reservations', methods=['GET','POST'])
 def reservations():
-    return render_template('reservations.html')
+    chart = create_seating_chart()
+    return render_template('reservations.html',chart = chart)
 
 
 app.run(host="0.0.0.0")

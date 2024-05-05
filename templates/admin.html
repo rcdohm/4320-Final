@@ -16,7 +16,9 @@
             <button type="submit">Submit</button>
         </form>
         {% if authenticated %}
-            <p>logged in</p>
+            {% for seat in chart %}
+                <p>{{ seat }}</p>
+            {% endfor %}
         {% endif %}
         
     </div>
