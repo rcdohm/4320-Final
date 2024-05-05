@@ -1,2 +1,24 @@
 {% extends 'base.html' %}
-<h1>test</h1>
+{% block content %}
+<body>
+    <div class="container">
+        <h1>Admin Login</h1>
+        {% if error_message %}
+        <p class="error">{{ error_message }}</p>
+        {% endif %}
+        <form method="POST">
+            <label for="username">Username</label>
+            <input type="text" name="username">
+            <br>
+            <label for="password">Password</label>
+            <input type="text" name="password">
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+        {% if authenticated %}
+            <p>logged in</p>
+        {% endif %}
+        
+    </div>
+</body>
+{% endblock %}

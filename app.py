@@ -1,14 +1,26 @@
 from flask import Flask, render_template, request, url_for, flash, redirect, abort
 import requests
+import sqlite3
 
 app = Flask(__name__, static_folder='static')
 app.config["DEBUG"] = True
 app.config['SECRET_KEY'] = 'your secret key'
 
+def get_db_connection():
+    # create connection to the database
+    conn = sqlite3.connect('reservations.db')
+    
+    # allows us to have name-based access to columns
+    # the database connection will return rows we can access like regular Python dictionaries
+    conn.row_factory = sqlite3.Row
+
+    #return the connection object
+    return conn
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        option = request.form['option']
+        option = request.form['siteselect']
         if not option:
             flash("Selection is required")
         elif option == "1":
@@ -24,7 +36,32 @@ def index():
 
 @app.route('/admin', methods=['GET','POST'])
 def admin():
-    return render_template('admin.html')
+    authenticated = False
+    if request.method == 'POST':
+        conn = get_db_connection()
+
+        users = conn.execute('SELECT * FROM admins').fetchall()
+
+        conn.close()
+
+        username = request.form['username']
+        password = request.form['password']
+
+        if not username:
+            flash("Please enter a username")
+
+        if not password:
+            flash("Please enter a password")
+
+
+        for user in users:
+            if username == user['username'] and password == user['password']:
+                authenticated = True
+        
+        if authenticated == False:
+            flash("Login credentials invalid")
+
+    return render_template('admin.html', authenticated=authenticated)
 
 @app.route('/reservations', methods=['GET','POST'])
 def reservations():
