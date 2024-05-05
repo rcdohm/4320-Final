@@ -10,6 +10,9 @@
         {% if error_message %}
             <div class="alert">{{ error_message }}</div>
         {% endif %}
+        {% for seat in chart %}
+                <p>{{ seat }}</p>
+        {% endfor %}
         <form action="/reserve" method="post">
             <div>
                 <label for="first_name">First Name:</label>
