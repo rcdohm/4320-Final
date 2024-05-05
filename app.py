@@ -1,7 +1,5 @@
 from flask import Flask, render_template, request, url_for, flash, redirect, abort
-import requests
 import sqlite3
-import uuid
 
 app = Flask(__name__, static_folder='static')
 app.config["DEBUG"] = True
@@ -10,12 +8,7 @@ app.config['SECRET_KEY'] = 'your secret key'
 def get_db_connection():
     # create connection to the database
     conn = sqlite3.connect('reservations.db')
-    
-    # allows us to have name-based access to columns
-    # the database connection will return rows we can access like regular Python dictionaries
     conn.row_factory = sqlite3.Row
-
-    #return the connection object
     return conn
 
 def generate_reservation_code(s):
@@ -84,7 +77,6 @@ def index():
             return redirect(url_for('index'))
     else:
         return render_template('index.html')
-   # return render_template('index.html')
 
 
 @app.route('/admin', methods=['GET','POST'])
