@@ -135,17 +135,27 @@ def reservations():
             chart = create_seating_chart()
             return render_template('reservations.html', chart=chart, errors=errors)
 
-        reservation_code = generate_reservation_code(first_name + last_name)
 
         conn = get_db_connection()
-        conn.execute('INSERT INTO reservations (passengerName, seatRow, seatColumn, eTicketNumber) VALUES (?, ?, ?, ?)',
+        
+        reservations = conn.execute("SELECT * FROM reservations").fetchall()
+
+        for res in reservations:
+            if seat_column == res['seatColumn'] or seat_row == res["seatRow"]:
+                flash("Seat is already taken. Please choose another.")
+                break
+            else: 
+                reservation_code = generate_reservation_code(first_name + last_name)
+                conn.execute('INSERT INTO reservations (passengerName, seatRow, seatColumn, eTicketNumber) VALUES (?, ?, ?, ?)',
                      (first_name + ' ' + last_name, seat_row, seat_column, reservation_code))
-        conn.commit()
+                conn.commit()
+                flash("Reservation successful! Your Ticket number is: " + reservation_code)
+
         conn.close()
 
-        flash("Reservation successful! Your Ticket number is: " + reservation_code)
+        
 
-        return redirect(url_for('index'))
+        return redirect(url_for('reservations'))
 
     chart = create_seating_chart()
     return render_template('reservations.html',chart = chart)
