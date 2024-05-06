@@ -57,8 +57,8 @@ def create_seating_chart():
     for seat in reservations:
         chart[seat['seatRow']][seat['seatColumn']] = 'X'
 
-    for row in chart:
-        print(row)        
+   # for row in chart:
+    #    print(row)        
 
     return chart
     
